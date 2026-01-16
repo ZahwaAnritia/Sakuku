@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import android.util.Patterns
 
 sealed class LoginState {
     object Idle : LoginState()
@@ -42,6 +43,12 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     // --- FUNGSI LOGIN ---
     fun login(email: String, pass: String) {
         viewModelScope.launch {
+            // VALIDASI: Cek format email sebelum kirim ke repo
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                _loginState.value = LoginState.Error("Format email tidak valid!")
+                return@launch
+            }
+
             _loginState.value = LoginState.Loading
             try {
                 val isSuccess = repository.login(email, pass)
@@ -59,6 +66,26 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     // --- FUNGSI REGISTER ---
     fun register(nama: String, email: String, pass: String) {
         viewModelScope.launch {
+            // 1. VALIDASI: Field tidak boleh kosong
+            if (nama.isEmpty() || email.isEmpty() || pass.isEmpty()) {
+                _loginState.value = LoginState.Error("Semua data wajib diisi!")
+                return@launch
+            }
+
+            // 2. VALIDASI: Pakai "Rumus Galak" (Custom Regex)
+            // Rumus ini memaksa email harus diakhiri huruf, bukan angka
+            val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
+            if (!email.matches(emailPattern.toRegex())) {
+                _loginState.value = LoginState.Error("Format email salah! Gunakan contoh: nama@gmail.com")
+                return@launch // <--- PENTING: Harus ada ini agar kodingan di bawahnya BERHENTI
+            }
+
+            // 3. VALIDASI: Password minimal 6 karakter
+            if (pass.length < 6) {
+                _loginState.value = LoginState.Error("Password minimal 6 karakter!")
+                return@launch
+            }
+
             _loginState.value = LoginState.Loading
             try {
                 val newUser = UserEntity(
@@ -69,10 +96,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
                     indomiePrice = 3500.0
                 )
                 repository.register(newUser)
-
-                // Setelah register sukses, user login manual
                 _loginState.value = LoginState.Success
-
             } catch (e: android.database.sqlite.SQLiteConstraintException) {
                 _loginState.value = LoginState.Error("Email sudah terdaftar!")
             } catch (e: Exception) {
