@@ -44,6 +44,9 @@ class AuthRepository(
         val userFromDb = userDao.loginLocal(email, sandi)
 
         if (userFromDb != null) {
+            val currentTime = System.currentTimeMillis() // Ambil waktu sekarang
+            userDao.updateLastLogin(email, currentTime) // Simpan ke Database
+
             context.dataStore.edit { pref ->
                 pref[KEY_USER_ID] = userFromDb.id // <--- SIMPAN ID INT
                 pref[KEY_USER_NAME] = userFromDb.nama
