@@ -66,6 +66,7 @@ fun CategoryScreen(
     // --- STATE UNTUK POP-UP VALIDASI ---
     var showDeleteDialog by remember { mutableStateOf(false) }
     var categoryToDelete by remember { mutableStateOf<CategoryEntity?>(null) }
+    var showAddSuccessDialog by remember { mutableStateOf(false) }
 
     var newCategoryName by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("OUT") }
@@ -157,6 +158,68 @@ fun CategoryScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Batal", color = Color.LightGray, fontSize = 13.sp)
+                    }
+                }
+            }
+        }
+    }
+    // --- POP-UP SUKSES TAMBAH KATEGORI (MODERN & RAMPING) ---
+    if (showAddSuccessDialog) {
+        androidx.compose.ui.window.Dialog(onDismissRequest = { showAddSuccessDialog = false }) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.75f) // Ramping (75% lebar layar)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(32.dp),
+                color = Color.White,
+                shadowElevation = 12.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Ikon Centang Hijau
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp)
+                            .background(Color(0xFFE8F5E9), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = null,
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(36.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    Text(
+                        text = "Berhasil!",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF263238)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Kategori baru telah ditambahkan.",
+                        fontSize = 13.sp,
+                        color = Color.Gray,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(
+                        onClick = { showAddSuccessDialog = false },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Sip!", fontWeight = FontWeight.Bold, color = Color.White)
                     }
                 }
             }
@@ -321,6 +384,7 @@ fun CategoryScreen(
                                     )
                                     newCategoryName = ""
                                     selectedIconName = "Lainnya"
+                                    showAddSuccessDialog = true
                                 }
                             },
                             shape = RoundedCornerShape(16.dp),
