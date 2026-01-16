@@ -23,8 +23,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState: StateFlow<LoginState> = _loginState
 
-    // --- DATA FLOW ---
-    // AMBIL USER ID DARI REPO
+
     val userId: StateFlow<Int> = repository.userId
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), -1)
 
@@ -40,17 +39,21 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     val currentIndomiePrice: StateFlow<String> = repository.currentIndomiePrice
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "3500")
 
-    // --- FUNGSI LOGIN ---
     fun login(email: String, pass: String) {
         viewModelScope.launch {
-            // VALIDASI: Cek format email sebelum kirim ke repo
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            // 1. VALIDASI: Cek format email pakai rumus galak (Custom Regex)
+            val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$"
+
+            if (!email.matches(emailPattern.toRegex())) {
                 _loginState.value = LoginState.Error("Format email tidak valid!")
                 return@launch
             }
 
+
             _loginState.value = LoginState.Loading
+
             try {
+
                 val isSuccess = repository.login(email, pass)
                 if (isSuccess) {
                     _loginState.value = LoginState.Success
@@ -63,24 +66,23 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    // --- FUNGSI REGISTER ---
+
     fun register(nama: String, email: String, pass: String) {
         viewModelScope.launch {
-            // 1. VALIDASI: Field tidak boleh kosong
+
             if (nama.isEmpty() || email.isEmpty() || pass.isEmpty()) {
                 _loginState.value = LoginState.Error("Semua data wajib diisi!")
                 return@launch
             }
 
-            // 2. VALIDASI: Pakai "Rumus Galak" (Custom Regex)
-            // Rumus ini memaksa email harus diakhiri huruf, bukan angka
-            val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
+
+            val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$"
             if (!email.matches(emailPattern.toRegex())) {
                 _loginState.value = LoginState.Error("Format email salah! Gunakan contoh: nama@gmail.com")
-                return@launch // <--- PENTING: Harus ada ini agar kodingan di bawahnya BERHENTI
+                return@launch
             }
 
-            // 3. VALIDASI: Password minimal 6 karakter
+
             if (pass.length < 6) {
                 _loginState.value = LoginState.Error("Password minimal 6 karakter!")
                 return@launch
@@ -105,7 +107,7 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
-    // --- UPDATE PROFILE ---
+
     fun updateProfile(limit: String, price: String) {
         viewModelScope.launch {
             val cleanLimit = limit.filter { it.isDigit() }

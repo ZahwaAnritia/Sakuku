@@ -143,7 +143,7 @@ fun AppNavigation(
                 )
             }
 
-            // 7. LAPORAN (PERBAIKAN: TAMBAH AUTH VIEWMODEL)
+            // 7. LAPORAN
             composable("laporan") {
                 val laporanViewModel: LaporanViewModel = viewModel(factory = viewModelFactory)
                 val authViewModel: AuthViewModel = viewModel(factory = viewModelFactory) // <--- BUAT INI
@@ -155,7 +155,7 @@ fun AppNavigation(
                 )
             }
 
-            // 8. ADD TRANSACTION (PERBAIKAN: TAMBAH AUTH VIEWMODEL)
+            // 8. ADD TRANSACTION
             composable("add_transaction") {
                 val transactionViewModel: TransactionViewModel = viewModel(factory = viewModelFactory)
                 val categoryViewModel: CategoryViewModel = viewModel(factory = viewModelFactory)
@@ -165,7 +165,7 @@ fun AppNavigation(
                     navController = navController,
                     transactionViewModel = transactionViewModel,
                     categoryViewModel = categoryViewModel,
-                    authViewModel = authViewModel // <--- KIRIM KE SCREEN
+                    authViewModel = authViewModel
                 )
             }
         }

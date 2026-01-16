@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -40,8 +41,11 @@ import java.util.Locale
 @Composable
 fun DashboardScreen(
     navController: NavController,
+
     viewModel: DashboardViewModel
 ) {
+    var showNotifInfo by remember { mutableStateOf(false) }
+
     // --- 1. DATA DARI VIEWMODEL ---
     val userName by viewModel.userName.collectAsState()
     val limitHarian by viewModel.dailyLimit.collectAsState()
@@ -61,6 +65,7 @@ fun DashboardScreen(
     val isOverBudget = limitHarian > 0 && totalExpenseBulanIni > limitHarian
     val isBorosHariIni = expenseHariIni > jatahHarianPintar && !isOverBudget
 
+    val context = androidx.compose.ui.platform.LocalContext.current
     val targetProgress = if (limitHarian > 0) (totalExpenseBulanIni / limitHarian).toFloat().coerceIn(0f, 1f) else 0f
     val progressAnimation by animateFloatAsState(
         targetValue = targetProgress,
@@ -118,9 +123,21 @@ fun DashboardScreen(
                 Surface(
                     color = Color.White.copy(alpha = 0.2f),
                     shape = CircleShape,
-                    modifier = Modifier.size(44.dp)
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clickable {
+                            showNotifInfo = true // Memunculkan popup
+                        }
                 ) {
-                    Icon(Icons.Default.Notifications, contentDescription = null, tint = Color.White, modifier = Modifier.padding(10.dp))
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifikasi",
+                        tint = Color.White,
+                        modifier = Modifier.padding(10.dp)
+
+
+                    )
+
                 }
             }
 
@@ -300,6 +317,70 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(100.dp))
         }
+        if (showNotifInfo) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = { showNotifInfo = false }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f) // Lebih ramping (80% lebar layar)
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = Color.White,
+                    shadowElevation = 10.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // 1. Ikon Lonceng Biru
+                        Box(
+                            modifier = Modifier
+                                .size(64.dp)
+                                .background(CyanPrimary.copy(alpha = 0.1f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Notifications,
+                                contentDescription = null,
+                                tint = CyanPrimary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        // 2. Judul Singkat
+                        Text(
+                            text = "Segera Hadir",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF263238)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // 3. Pesan Singkat (Micro-copy)
+                        Text(
+                            text = "Fitur pengingat cerdas sedang dikembangkan.",
+                            fontSize = 13.sp,
+                            color = Color.Gray,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // 4. Tombol Oke (Lebar)
+                        Button(
+                            onClick = { showNotifInfo = false },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Oke", fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -341,5 +422,6 @@ fun SmallStatCard(label: String, value: String, icon: ImageVector, color: Color,
             Text(label, fontSize = 12.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
             Text(value, fontSize = 15.sp, fontWeight = FontWeight.Black, color = color)
         }
+
     }
 }

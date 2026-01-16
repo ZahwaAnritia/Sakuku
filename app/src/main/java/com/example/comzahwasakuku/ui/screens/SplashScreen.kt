@@ -25,7 +25,7 @@ import com.example.comzahwasakuku.ui.theme.CyanPrimary
 @Composable
 fun SplashScreen(onTimeout: () -> Unit) {
 
-    // Timer 2 detik sebelum pindah (Logika tetap sama)
+
     LaunchedEffect(true) {
         delay(2000)
         onTimeout()
@@ -35,7 +35,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(
-                // Menggunakan Gradasi yang sama dengan Dashboard agar transisi mulus
+
                 brush = Brush.verticalGradient(
                     colors = listOf(Color(0xFF00BCD4), Color(0xFF0097A7))
                 )
@@ -46,7 +46,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // --- BAGIAN LOGO PREMIUM ---
+
             Box(
                 modifier = Modifier
                     .size(140.dp)
@@ -55,7 +55,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
                     .background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                // Ikon Dompet dengan warna CyanPrimary
+
                 Icon(
                     imageVector = Icons.Default.AccountBalanceWallet,
                     contentDescription = "Logo Sakuku",
@@ -66,13 +66,13 @@ fun SplashScreen(onTimeout: () -> Unit) {
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // --- NAMA APLIKASI ---
+
             Text(
                 text = "SAKUKU",
                 color = Color.White,
                 fontSize = 40.sp,
-                fontWeight = FontWeight.Black, // Lebih tebal agar terlihat bold/premium
-                letterSpacing = 4.sp // Jarak antar huruf diperlebar
+                fontWeight = FontWeight.Black,
+                letterSpacing = 4.sp
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -85,7 +85,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
             )
         }
 
-        // --- FOOTER ---
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)

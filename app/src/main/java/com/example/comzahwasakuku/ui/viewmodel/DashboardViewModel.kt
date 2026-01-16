@@ -19,7 +19,7 @@ class DashboardViewModel(
     private val transactionDao: TransactionDao
 ) : ViewModel() {
 
-    // --- HELPER: HITUNG JAM (Untuk filter hari ini) ---
+    // HELPER: HITUNG JAM (Untuk filter hari ini)
     private val startOfDay: Long
         get() {
             val calendar = Calendar.getInstance()
@@ -49,15 +49,15 @@ class DashboardViewModel(
         .map { it.toDoubleOrNull() ?: 0.0 }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
-    // 3. PENGELUARAN HARI INI (FIX: Pakai userId dari repository)
-    // Menggunakan flatMapLatest ke 'repository.userId' (bukan email lagi)
+    // 3. PENGELUARAN HARI INI
+
     val todayExpense: StateFlow<Double> = repository.userId.flatMapLatest { id ->
         transactionDao.getExpenseByDate(id, startOfDay, endOfDay)
     }
         .map { it ?: 0.0 }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
-    // 4. TOTAL PENGELUARAN (FIX: Pakai userId)
+    // 4. TOTAL PENGELUARAN
     val totalExpense: StateFlow<Double> = repository.userId.flatMapLatest { id ->
         transactionDao.getTotalExpense(id)
     }

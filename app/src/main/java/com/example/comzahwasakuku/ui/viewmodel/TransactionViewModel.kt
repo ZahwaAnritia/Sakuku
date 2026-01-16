@@ -17,7 +17,7 @@ class TransactionViewModel(
 
     // Fungsi Add terima userId Int
     fun addTransaction(
-        userId: Int, // <--- GANTI JADI INT
+        userId: Int,
         amount: Double,
         category: String,
         note: String,
@@ -29,13 +29,13 @@ class TransactionViewModel(
 
         if (amount <= 0.0) {
             onError("Nominal transaksi tidak boleh 0 atau kosong!")
-            return // Berhenti di sini, jangan lanjut simpan ke database
+            return
         }
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val transaction = TransactionEntity(
-                    userId = userId, // <--- SIMPAN ID
+                    userId = userId,
                     amount = amount,
                     category = category,
                     note = note,

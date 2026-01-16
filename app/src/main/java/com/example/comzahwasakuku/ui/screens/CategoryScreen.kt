@@ -31,7 +31,7 @@ import com.example.comzahwasakuku.ui.theme.CyanPrimary
 import com.example.comzahwasakuku.ui.viewmodel.AuthViewModel
 import com.example.comzahwasakuku.ui.viewmodel.CategoryViewModel
 
-// --- DATA IKON VISUAL ---
+
 val categoryIcons = mapOf(
     "Makan" to Icons.Default.Restaurant,
     "Belanja" to Icons.Default.ShoppingCart,
@@ -51,7 +51,7 @@ fun CategoryScreen(
     authViewModel: AuthViewModel,
     onBackClick: () -> Unit
 ) {
-    // --- DATA ---
+
     val userId by authViewModel.userId.collectAsState()
 
     LaunchedEffect(userId) {
@@ -71,7 +71,9 @@ fun CategoryScreen(
     var selectedType by remember { mutableStateOf("OUT") }
     var selectedIconName by remember { mutableStateOf("Lainnya") }
 
-    // --- STATUS BAR COLOR ---
+
+    val isInputValid = newCategoryName.isNotBlank()
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -81,36 +83,88 @@ fun CategoryScreen(
         }
     }
 
-    // --- LOGIKA POP-UP VALIDASI ---
+// POP-UP HAPUS ULTRA SLIM
     if (showDeleteDialog && categoryToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(text = "Hapus Kategori?", fontWeight = FontWeight.Bold) },
-            text = { Text("Apakah Anda yakin ingin menghapus kategori '${categoryToDelete?.name}'? Tindakan ini tidak dapat dibatalkan.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        categoryToDelete?.let { viewModel.deleteCategory(it) }
-                        showDeleteDialog = false
-                        categoryToDelete = null
-                    },
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252))
+        androidx.compose.ui.window.Dialog(onDismissRequest = { showDeleteDialog = false }) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth(0.75f)
+                    .wrapContentHeight(),
+                shape = RoundedCornerShape(32.dp),
+                color = Color.White,
+                shadowElevation = 12.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Hapus", color = Color.White)
+
+                    Box(
+                        modifier = Modifier
+                            .size(60.dp)
+                            .background(Color(0xFFFFEBEE), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.DeleteForever,
+                            contentDescription = null,
+                            tint = Color(0xFFFF5252),
+                            modifier = Modifier.size(32.dp) // Ikon lebih proporsional
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 2. Judul Ramping
+                    Text(
+                        text = "Hapus Kategori",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF263238)
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+
+                    Text(
+                        text = "Hapus '${categoryToDelete?.name}'?",
+                        fontSize = 14.sp,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+
+                    Button(
+                        onClick = {
+                            categoryToDelete?.let { viewModel.deleteCategory(it) }
+                            showDeleteDialog = false
+                            categoryToDelete = null
+                        },
+                        modifier = Modifier.fillMaxWidth().height(46.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text("Ya, Hapus", fontWeight = FontWeight.Bold, color = Color.White, fontSize = 14.sp)
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    TextButton(
+                        onClick = { showDeleteDialog = false },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Batal", color = Color.LightGray, fontSize = 13.sp)
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Batal", color = Color.Gray)
-                }
-            },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(24.dp)
-        )
+            }
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FAFB))) {
-        // 1. BACKGROUND GRADIENT
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -123,7 +177,7 @@ fun CategoryScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // --- HEADER ---
+
             Row(
                 modifier = Modifier
                     .padding(top = 44.dp, bottom = 16.dp, start = 8.dp, end = 16.dp)
@@ -142,7 +196,6 @@ fun CategoryScreen(
                 )
             }
 
-            // --- TYPE SELECTOR ---
             Surface(
                 modifier = Modifier
                     .padding(horizontal = 20.dp)
@@ -184,7 +237,7 @@ fun CategoryScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- FORM INPUT CARD ---
+            // FORM INPUT
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -240,7 +293,12 @@ fun CategoryScreen(
                         OutlinedTextField(
                             value = newCategoryName,
                             onValueChange = { newCategoryName = it },
-                            placeholder = { Text("Nama kategori baru...", color = Color.LightGray) },
+                            placeholder = {
+                                Text(
+                                    "Nama kategori baru...",
+                                    color = Color.LightGray
+                                )
+                            },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(16.dp),
                             singleLine = true,
@@ -266,16 +324,27 @@ fun CategoryScreen(
                                 }
                             },
                             shape = RoundedCornerShape(16.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
+                            // Warna berubah jadi abu-abu kalau belum ngetik
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isInputValid) CyanPrimary else Color.LightGray,
+                                disabledContainerColor = Color.LightGray.copy(alpha = 0.5f)
+                            ),
                             contentPadding = PaddingValues(0.dp),
                             modifier = Modifier.size(56.dp),
-                            enabled = !isLoading
+                            // Tombol mati ga bisa diklik kalau belum ngetik
+                            enabled = !isLoading && isInputValid
                         ) {
                             if (isLoading) {
-                                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                                CircularProgressIndicator(
+                                    color = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             } else {
-                                // Ikon Tambah tetap sesuai bentuk aslinya
-                                Icon(Icons.Default.Add, contentDescription = null, tint = Color.White)
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null,
+                                    tint = if (isInputValid) Color.White else Color.Gray
+                                )
                             }
                         }
                     }
@@ -354,9 +423,9 @@ fun CategoryScreen(
                                     modifier = Modifier.weight(1f)
                                 )
 
-                                // Indikator Kategori Sistem vs User
+
                                 if (cat.userId != 0) {
-                                    // Ikon Sampah sekarang diwarnai Merah dan memicu Pop-up
+
                                     IconButton(onClick = {
                                         categoryToDelete = cat
                                         showDeleteDialog = true

@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 @Database(
     entities = [TransactionEntity::class, CategoryEntity::class, UserEntity::class],
-    version = 10, // <--- NAIKKAN VERSI INI (Misal dari 6 ke 7, 8, atau 9)
+    version = 10,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -34,10 +34,10 @@ abstract class AppDatabase : RoomDatabase() {
                 scope.launch {
                     val categoryDao = database.categoryDao()
 
-                    // 1. Jalankan perintah ganti nama (Rename)
+
                     categoryDao.renameSystemCategory("Uang Saku", "Lainnya")
 
-                    // 2. Tetap jalankan fungsi populate yang lama (untuk jaga-jaga)
+
                     populateDatabaseIfEmpty(categoryDao)
                 }
             }
@@ -45,10 +45,10 @@ abstract class AppDatabase : RoomDatabase() {
 
         suspend fun populateDatabaseIfEmpty(categoryDao: CategoryDao) {
             if (categoryDao.getCount() == 0) {
-                // ID 0 ARTINYA MILIK SYSTEM (GLOBAL)
+
                 val systemId = 0
 
-                // Pengeluaran
+
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Makan", type = "OUT", icon = "Makan"))
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Transport", type = "OUT", icon = "Transport"))
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Belanja", type = "OUT", icon = "Belanja"))
@@ -56,7 +56,7 @@ abstract class AppDatabase : RoomDatabase() {
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Kesehatan", type = "OUT", icon = "Kesehatan"))
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Pendidikan", type = "OUT", icon = "School"))
 
-                // Pemasukan
+
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Gaji", type = "IN", icon = "Uang"))
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Bonus", type = "IN", icon = "Uang"))
                 categoryDao.insertCategory(CategoryEntity(userId = systemId, name = "Lainnya", type = "IN", icon = "Uang"))

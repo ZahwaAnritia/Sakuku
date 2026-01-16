@@ -16,7 +16,7 @@ class SessionManager(context: Context) {
         const val KEY_TOKEN = "token"
         const val KEY_NAME = "name"
         const val KEY_EMAIL = "email"
-        // Tambahan Key Baru
+
         const val KEY_LIMIT = "limit"
         const val KEY_PRICE = "price"
     }

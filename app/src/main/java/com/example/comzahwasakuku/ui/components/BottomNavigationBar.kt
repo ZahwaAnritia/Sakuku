@@ -25,7 +25,7 @@ fun BottomNavigationBar(
     navController: NavController,
     onFabClick: () -> Unit
 ) {
-    // 1. Ambil Rute Sekarang
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
@@ -35,7 +35,7 @@ fun BottomNavigationBar(
         BottomNavItem("Profil", "profile", Icons.Default.Person)
     )
 
-    // --- NAVBAR UTAMA ---
+
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 0.dp,
@@ -43,8 +43,6 @@ fun BottomNavigationBar(
             .height(90.dp)
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
             .border(
-                // GANTI DI SINI:
-                // Dari Color(0xFFEEEEEE) -> Color.LightGray atau Color(0xFFD0D0D0)
                 BorderStroke(1.dp, Color(0xFFD0D0D0)),
                 shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
             )
@@ -53,7 +51,7 @@ fun BottomNavigationBar(
             val isSelected = currentRoute == item.route
 
             NavigationBarItem(
-                // REVISI PENTING: MENAMBAH JARAK DARI ATAS
+
                 modifier = Modifier.padding(top = 16.dp),
 
                 icon = { Icon(item.icon, contentDescription = item.label) },

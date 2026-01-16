@@ -49,15 +49,13 @@ fun LaporanScreen(
     viewModel: LaporanViewModel,
     authViewModel: AuthViewModel
 ) {
-    // 1. Ambil Data
+
     val userId by authViewModel.userId.collectAsState()
     val transactionList by viewModel.getTransactions(userId).collectAsState(initial = emptyList())
 
     var selectedFilter by remember { mutableStateOf("Semua") }
     val filters = listOf("Mingguan", "Bulanan", "Semua")
 
-    // PERBAIKAN LOGIKA URUTAN:
-    // Menggunakan sortedWith agar jika tanggal sama, item dengan transId lebih besar (input terbaru) ada di atas.
     val filteredList = viewModel.filterTransactions(transactionList, selectedFilter)
         .sortedWith(compareByDescending<TransactionEntity> { it.date }.thenByDescending { it.id })
 

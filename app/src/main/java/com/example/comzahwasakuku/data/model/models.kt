@@ -8,7 +8,7 @@ data class RegisterRequest(val nama: String, val email: String, val password: St
 data class LoginResponse(val error: Boolean, val message: String, val data: User?)
 typealias AuthResponse = LoginResponse
 
-// 2. USER UPDATE
+// 2. USER
 data class UpdateProfileRequest(val target_limit: Double, val indomie_price: Double)
 
 // 3. TRANSACTION
@@ -44,7 +44,7 @@ data class CategoryItem(val kategori_id: Int, val user_id: Int?, val name: Strin
 data class CategoryResponse(val error: Boolean, val message: String? = null, val data: List<CategoryItem>)
 data class CategoryActionResponse(val error: Boolean, val message: String)
 
-// 5. DASHBOARD (SUDAH DIPERBAIKI)
+// 5. DASHBOARD
 data class DashboardResponse(val error: Boolean, val message: String, val data: DashboardData?)
 data class DashboardData(
     val sisa_saldo: Double,
@@ -52,7 +52,7 @@ data class DashboardData(
     val total_pengeluaran: Double,
     @SerializedName("target_limit") val limit_harian: Double?,
     val indomie_index: Int,
-    val indomie_price: Double, // <--- SUDAH DITAMBAHKAN
+    val indomie_price: Double,
     val recent_transactions: List<TransactionItem>
 )
 

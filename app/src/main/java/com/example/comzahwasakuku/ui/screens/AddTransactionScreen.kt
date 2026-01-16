@@ -14,7 +14,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -56,7 +58,7 @@ fun AddTransactionScreen(
         }
     }
 
-    // --- STATE ---
+
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf("OUT") }
@@ -64,10 +66,14 @@ fun AddTransactionScreen(
     var selectedCategoryName by remember { mutableStateOf("") }
     var expandedCategory by remember { mutableStateOf(false) }
 
+
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
     val categoryState by categoryViewModel.categories.collectAsState()
     val isLoading by transactionViewModel.isLoading.collectAsState()
 
-    // Init Date
+
     LaunchedEffect(Unit) {
         val c = Calendar.getInstance()
         val y = c.get(Calendar.YEAR)
@@ -78,7 +84,7 @@ fun AddTransactionScreen(
 
     val filteredCategories = categoryState.filter { it.type == selectedType }
 
-    // --- STATUS BAR SYNC ---
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -89,7 +95,7 @@ fun AddTransactionScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FAFB))) {
-        // 1. GRADIENT HEADER
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,7 +108,7 @@ fun AddTransactionScreen(
         )
 
         Column(modifier = Modifier.fillMaxSize()) {
-            // --- CUSTOM HEADER ROW ---
+
             Row(
                 modifier = Modifier
                     .padding(start = 8.dp, top = 44.dp, end = 16.dp, bottom = 16.dp)
@@ -121,7 +127,7 @@ fun AddTransactionScreen(
                 )
             }
 
-            // --- TYPE SELECTOR (CAPSULE STYLE) ---
+
             Surface(
                 modifier = Modifier
                     .padding(start = 20.dp, top = 0.dp, end = 20.dp, bottom = 0.dp)
@@ -166,7 +172,7 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // --- MAIN FORM CARD ---
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -189,7 +195,7 @@ fun AddTransactionScreen(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    // Input Nominal
+
                     OutlinedTextField(
                         value = amount,
                         onValueChange = { if (it.all { c -> c.isDigit() }) amount = it },
@@ -207,7 +213,7 @@ fun AddTransactionScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Dropdown Kategori
+
                     ExposedDropdownMenuBox(
                         expanded = expandedCategory,
                         onExpandedChange = { expandedCategory = !expandedCategory }
@@ -251,7 +257,7 @@ fun AddTransactionScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Input Tanggal
+
                     Box(modifier = Modifier.fillMaxWidth()) {
                         OutlinedTextField(
                             value = selectedDateText,
@@ -278,7 +284,7 @@ fun AddTransactionScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Input Catatan
+
                     OutlinedTextField(
                         value = note,
                         onValueChange = { note = it },
@@ -293,7 +299,7 @@ fun AddTransactionScreen(
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Tombol Simpan
+
                     Button(
                         onClick = {
                             if (amount.isNotEmpty() && selectedCategoryName.isNotEmpty()) {
@@ -308,13 +314,13 @@ fun AddTransactionScreen(
                                     type = selectedType,
                                     date = dateLong,
                                     onSuccess = {
-                                        Toast.makeText(context, "Transaksi Berhasil!", Toast.LENGTH_SHORT).show()
-                                        navController.popBackStack()
+                                        showSuccessDialog = true
                                     },
                                     onError = { msg -> Toast.makeText(context, "Gagal: $msg", Toast.LENGTH_SHORT).show() }
                                 )
                             } else {
-                                Toast.makeText(context, "Harap isi nominal & kategori!", Toast.LENGTH_SHORT).show()
+                                errorMessage = "Harap isi nominal dan pilih kategori terlebih dahulu."
+                                showErrorDialog = true
                             }
                         },
                         modifier = Modifier
@@ -333,7 +339,145 @@ fun AddTransactionScreen(
                     }
                 }
             }
+
             Spacer(modifier = Modifier.height(40.dp))
+        }
+
+        // --- POP-UP SUKSES TRANSAKSI (ULTRA SLIM & COMPACT) ---
+        if (showSuccessDialog) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = {
+                showSuccessDialog = false
+                navController.popBackStack()
+            }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(0.75f) // Lebih ramping agar tidak terlihat besar
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(32.dp), // Sudut lebih membulat (modern)
+                    color = Color.White,
+                    shadowElevation = 12.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp), // Padding yang lebih rapat
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // 1. Ikon Centang Kecil & Elegan
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(Color(0xFFE8F5E9), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = Color(0xFF4CAF50),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // 2. Judul Singkat
+                        Text(
+                            text = "Berhasil!",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF263238)
+                        )
+
+                        Spacer(modifier = Modifier.height(6.dp))
+
+                        // 3. Pesan Padat
+                        Text(
+                            text = "Transaksi telah dicatat.",
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // 4. Tombol Utama Rapi
+                        Button(
+                            onClick = {
+                                showSuccessDialog = false
+                                navController.popBackStack()
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(46.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Sip!", fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+        // --- POP-UP ERROR/VALIDATION (DI TENGAH) ---
+        if (showErrorDialog) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = { showErrorDialog = false }) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth(0.75f)
+                        .wrapContentHeight(),
+                    shape = RoundedCornerShape(32.dp),
+                    color = Color.White,
+                    shadowElevation = 12.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Ikon Peringatan Merah
+                        Box(
+                            modifier = Modifier
+                                .size(60.dp)
+                                .background(Color(0xFFFFEBEE), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Warning,
+                                contentDescription = null,
+                                tint = Color(0xFFFF5252),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Belum Lengkap",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Black,
+                            color = Color(0xFF263238)
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = errorMessage,
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        Button(
+                            onClick = { showErrorDialog = false },
+                            modifier = Modifier.fillMaxWidth().height(46.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Perbaiki", fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+            }
         }
     }
 }

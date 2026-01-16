@@ -12,8 +12,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,16 +45,25 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
+    }
+
     // --- STATE ---
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    // State untuk kontrol Dialog
+    var showSuccessDialog by remember { mutableStateOf(false) }
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
     val loginState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    // Sync Status Bar (Teal Deep)
+    // Sync Status Bar
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -62,168 +73,104 @@ fun LoginScreen(
         }
     }
 
+    // --- MONITOR LOGIN STATE ---
     LaunchedEffect(loginState) {
         when (loginState) {
             is LoginState.Success -> {
-                Toast.makeText(context, "Login Berhasil!", Toast.LENGTH_SHORT).show()
-                onLoginSuccess()
+                showSuccessDialog = true
             }
             is LoginState.Error -> {
-                val errorMsg = (loginState as LoginState.Error).message
-                Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                errorMessage = (loginState as LoginState.Error).message
+                showErrorDialog = true
+                viewModel.resetState() // Bersihkan state agar tidak loop
             }
             else -> {}
         }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FAFB))) {
-        // 1. DYNAMIC BACKGROUND (Header Gradient yang lebih bertekstur)
+        // Gradient Header
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(340.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(Color(0xFF00BCD4), Color(0xFF0097A7))
-                    )
-                )
+            modifier = Modifier.fillMaxWidth().height(340.dp)
+                .background(Brush.verticalGradient(listOf(Color(0xFF00BCD4), Color(0xFF0097A7))))
         )
 
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState),
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(64.dp))
 
-            // 2. BRANDING SECTION (Logo dengan Glow Effect)
+            // Logo Icon
             Box(
-                modifier = Modifier
-                    .size(100.dp)
-                    .shadow(
-                        elevation = 30.dp,
-                        shape = CircleShape,
-                        ambientColor = Color.White.copy(alpha = 0.5f),
-                        spotColor = Color.White.copy(alpha = 0.5f)
-                    )
-                    .clip(CircleShape)
-                    .background(Color.White),
+                modifier = Modifier.size(100.dp).shadow(30.dp, CircleShape).clip(CircleShape).background(Color.White),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.AccountBalanceWallet,
-                    contentDescription = null,
-                    tint = Color(0xFF0097A7),
-                    modifier = Modifier.size(52.dp)
-                )
+                Icon(Icons.Default.AccountBalanceWallet, null, tint = Color(0xFF0097A7), modifier = Modifier.size(52.dp))
             }
 
             Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "SAKUKU",
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Black,
-                color = Color.White,
-                letterSpacing = 4.sp
-            )
-            Text(
-                text = "Asisten Finansial Pintar Mahasiswa",
-                fontSize = 14.sp,
-                color = Color.White.copy(alpha = 0.8f),
-                fontWeight = FontWeight.Medium
-            )
+            Text("SAKUKU", fontSize = 36.sp, fontWeight = FontWeight.Black, color = Color.White, letterSpacing = 4.sp)
+            Text("Asisten Finansial Pintar Mahasiswa", fontSize = 14.sp, color = Color.White.copy(alpha = 0.8f))
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // 3. LOGIN CARD (Refined floating card)
+            // Card Login
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .shadow(
-                        elevation = 20.dp,
-                        shape = RoundedCornerShape(32.dp),
-                        ambientColor = Color.Black.copy(alpha = 0.1f)
-                    ),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp).shadow(20.dp, RoundedCornerShape(32.dp)),
                 shape = RoundedCornerShape(32.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFF1F3F4))
+                colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 28.dp, vertical = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(
-                        text = "Masuk Ke Akun",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF263238)
-                    )
-
+                    Text("Masuk Ke Akun", fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)
                     Spacer(modifier = Modifier.height(28.dp))
 
-                    // Input Email
                     OutlinedTextField(
                         value = email,
                         onValueChange = { email = it },
                         label = { Text("Email") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyanPrimary,
-                            unfocusedBorderColor = Color(0xFFF1F3F4),
-                            focusedLabelColor = CyanPrimary
-                        )
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CyanPrimary, focusedLabelColor = CyanPrimary)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Input Password
                     OutlinedTextField(
                         value = password,
                         onValueChange = { password = it },
                         label = { Text("Password") },
                         modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
                         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         shape = RoundedCornerShape(16.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = CyanPrimary,
-                            unfocusedBorderColor = Color(0xFFF1F3F4),
-                            focusedLabelColor = CyanPrimary
-                        ),
+                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = CyanPrimary, focusedLabelColor = CyanPrimary),
                         trailingIcon = {
                             val image = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
                             IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(imageVector = image, contentDescription = null, tint = Color.LightGray)
+                                Icon(imageVector = image, contentDescription = null)
                             }
                         }
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    // Button Login dengan Bayangan Cyan
                     Button(
                         onClick = {
-                            if (email.isNotEmpty() && password.length >= 6) {
-                                viewModel.login(email, password)
+                            val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$"
+                            if (email.isBlank() || password.isBlank()) {
+                                errorMessage = "Email dan Password wajib diisi!"
+                                showErrorDialog = true
+                            } else if (!email.matches(emailPattern.toRegex())) {
+                                errorMessage = "Format email salah!"
+                                showErrorDialog = true
                             } else {
-                                Toast.makeText(context, "Email & Password tidak valid", Toast.LENGTH_SHORT).show()
+                                viewModel.login(email, password)
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(56.dp)
-                            .shadow(
-                                elevation = 12.dp,
-                                shape = RoundedCornerShape(16.dp),
-                                spotColor = CyanPrimary
-                            ),
+                        modifier = Modifier.fillMaxWidth().height(56.dp).shadow(12.dp, RoundedCornerShape(16.dp)),
                         colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
                         shape = RoundedCornerShape(16.dp),
                         enabled = loginState !is LoginState.Loading
@@ -231,32 +178,59 @@ fun LoginScreen(
                         if (loginState is LoginState.Loading) {
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
                         } else {
-                            Text(
-                                "Masuk Sekarang",
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Black,
-                                color = Color.White
-                            )
+                            Text("Masuk Sekarang", fontSize = 16.sp, fontWeight = FontWeight.Black)
                         }
                     }
                 }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
+            Row(modifier = Modifier.padding(bottom = 48.dp)) {
+                Text("Belum punya akun? ", color = Color.Gray)
+                Text("Daftar Akun", color = CyanPrimary, fontWeight = FontWeight.Black, modifier = Modifier.clickable { onNavigateToRegister() })
+            }
+        }
 
-            // 4. FOOTER (Navigasi ke Register)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(bottom = 48.dp)
-            ) {
-                Text("Belum punya akun? ", color = Color.Gray, fontSize = 14.sp)
-                Text(
-                    text = "Daftar Akun",
-                    color = CyanPrimary,
-                    fontWeight = FontWeight.Black,
-                    fontSize = 14.sp,
-                    modifier = Modifier.clickable { onNavigateToRegister() }
-                )
+        // --- 1. DIALOG SUKSES (HIJAU) ---
+        if (showSuccessDialog) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = {
+                showSuccessDialog = false
+                onLoginSuccess()
+            }) {
+                Surface(modifier = Modifier.fillMaxWidth(0.75f).wrapContentHeight(), shape = RoundedCornerShape(28.dp), color = Color.White) {
+                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.size(64.dp).background(Color(0xFFE8F5E9), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(36.dp))
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Halo!", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        Text("Login berhasil.", color = Color.Gray, fontSize = 14.sp)
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = { showSuccessDialog = false; onLoginSuccess() }, modifier = Modifier.fillMaxWidth().height(46.dp), colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary), shape = RoundedCornerShape(12.dp)) {
+                            Text("Lanjut", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
+            }
+        }
+
+        // --- 2. DIALOG ERROR (MERAH) ---
+        if (showErrorDialog) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = { showErrorDialog = false }) {
+                Surface(modifier = Modifier.fillMaxWidth(0.75f).wrapContentHeight(), shape = RoundedCornerShape(28.dp), color = Color.White) {
+                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.size(64.dp).background(Color(0xFFFFEBEE), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.Warning, null, tint = Color(0xFFFF5252), modifier = Modifier.size(36.dp))
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Gagal", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        Text(errorMessage, color = Color.Gray, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(onClick = { showErrorDialog = false }, modifier = Modifier.fillMaxWidth().height(46.dp), colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)), shape = RoundedCornerShape(12.dp)) {
+                            Text("Coba Lagi", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
             }
         }
     }

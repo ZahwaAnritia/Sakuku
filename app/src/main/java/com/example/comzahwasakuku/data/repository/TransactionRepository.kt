@@ -10,7 +10,7 @@ class TransactionRepository(private val transactionDao: TransactionDao) {
         transactionDao.insertTransaction(transaction)
     }
 
-    // --- REVISI: Ganti Email (String) jadi User ID (Int) ---
+
     fun getAllTransactions(userId: Int): Flow<List<TransactionEntity>> {
         return transactionDao.getAllTransactions(userId)
     }

@@ -23,7 +23,7 @@ interface TransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTransaction(transaction: TransactionEntity)
 
-    // Pastikan baris ini ada di TransactionDao.kt:
+
     @Query("SELECT SUM(amount) FROM transactions WHERE type = 'OUT' AND user_id = :userId AND date BETWEEN :start AND :end")
     fun getExpenseByDate(userId: Int, start: Long, end: Long): Flow<Double?>
 

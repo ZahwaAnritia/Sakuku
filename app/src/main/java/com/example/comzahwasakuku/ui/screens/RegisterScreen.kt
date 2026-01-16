@@ -12,8 +12,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,7 +45,10 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    // --- DATA (LOGIKA TETAP) ---
+    LaunchedEffect(Unit) {
+        viewModel.resetState()
+    }
+
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -52,11 +57,15 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var confirmPasswordVisible by remember { mutableStateOf(false) }
 
+    var showSuccessDialog by remember { mutableStateOf(false) }
+
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
     val registerState by viewModel.loginState.collectAsState()
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    // Status Bar Sync (Premium Cyan)
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
@@ -66,23 +75,23 @@ fun RegisterScreen(
         }
     }
 
-    // Handle Hasil Register
+
     LaunchedEffect(registerState) {
         when (registerState) {
             is LoginState.Success -> {
-                Toast.makeText(context, "Registrasi Berhasil! Silakan Login.", Toast.LENGTH_SHORT).show()
-                onRegisterSuccess()
+                showSuccessDialog = true
             }
             is LoginState.Error -> {
                 val errorMsg = (registerState as LoginState.Error).message
                 Toast.makeText(context, errorMsg, Toast.LENGTH_LONG).show()
+                viewModel.resetState()
             }
             else -> {}
         }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8FAFB))) {
-        // 1. GRADIENT HEADER BACKGROUND
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,7 +111,7 @@ fun RegisterScreen(
         ) {
             Spacer(modifier = Modifier.height(50.dp))
 
-            // 2. BRANDING LOGO (Sama dengan Login)
+
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -137,7 +146,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
-            // 3. REGISTER CARD (Floating Effect)
+            // 3. REGISTER
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -251,18 +260,28 @@ fun RegisterScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     // Button Daftar
+                    // Button Daftar
                     Button(
                         onClick = {
+                            val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}$"
+
                             if (fullName.isBlank() || email.isBlank() || password.isBlank()) {
-                                Toast.makeText(context, "Semua data wajib diisi", Toast.LENGTH_SHORT).show()
+                                errorMessage = "Semua data wajib diisi!"
+                                showErrorDialog = true
+                            } else if (!email.matches(emailPattern.toRegex())) {
+                                errorMessage = "Format email salah!"
+                                showErrorDialog = true
                             } else if (password.length < 6) {
-                                Toast.makeText(context, "Password minimal 6 karakter", Toast.LENGTH_SHORT).show()
+                                errorMessage = "Password minimal 6 karakter!"
+                                showErrorDialog = true
                             } else if (password != confirmPassword) {
-                                Toast.makeText(context, "Konfirmasi password tidak cocok", Toast.LENGTH_SHORT).show()
+                                errorMessage = "Password tidak cocok!"
+                                showErrorDialog = true
                             } else {
                                 viewModel.register(fullName, email, password)
                             }
                         },
+                        // ... sisa properti button tetap sama ...
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp)
@@ -294,6 +313,75 @@ fun RegisterScreen(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.clickable { onNavigateToLogin() }
                 )
+            }
+
+        }
+        if (showSuccessDialog) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = {
+                showSuccessDialog = false
+                onNavigateToLogin() // Pindah ke Login
+            }) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(0.85f).wrapContentHeight(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = Color.White
+                ) {
+                    Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.size(72.dp).background(Color(0xFFE0F7FA), CircleShape), contentAlignment = Alignment.Center) {
+                            Icon(Icons.Default.CheckCircle, null, tint = CyanPrimary, modifier = Modifier.size(44.dp))
+                        }
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Text("Berhasil!", fontSize = 20.sp, fontWeight = FontWeight.Black)
+                        Text("Akun kamu sudah aktif.", fontSize = 14.sp, color = Color.Gray)
+                        Spacer(modifier = Modifier.height(28.dp))
+                        Button(
+                            onClick = {
+                                showSuccessDialog = false
+                                onNavigateToLogin() // Pindah ke Login
+                            },
+                            modifier = Modifier.fillMaxWidth().height(50.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = CyanPrimary),
+                            shape = RoundedCornerShape(14.dp)
+                        ) {
+                            Text("Masuk Sekarang", fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                    }
+                }
+            }
+        }
+        // --- POP-UP ERROR (DI TENGAH) ---
+        if (showErrorDialog) {
+            androidx.compose.ui.window.Dialog(onDismissRequest = { showErrorDialog = false }) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(0.75f).wrapContentHeight(),
+                    shape = RoundedCornerShape(28.dp),
+                    color = Color.White
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        // Ikon Peringatan Merah
+                        Box(
+                            modifier = Modifier.size(60.dp).background(Color(0xFFFFEBEE), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.Warning, null, tint = Color(0xFFFF5252), modifier = Modifier.size(32.dp))
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Oops!", fontSize = 18.sp, fontWeight = FontWeight.Black)
+                        Text(errorMessage, fontSize = 14.sp, color = Color.Gray, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Button(
+                            onClick = { showErrorDialog = false },
+                            modifier = Modifier.fillMaxWidth().height(46.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF5252)),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text("Perbaiki", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                }
             }
         }
     }

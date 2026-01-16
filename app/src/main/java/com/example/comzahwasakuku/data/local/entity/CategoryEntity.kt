@@ -10,7 +10,7 @@ data class CategoryEntity(
     @ColumnInfo(name = "kategori_id")
     val id: Int = 0,
 
-    @ColumnInfo(name = "user_id") // ID 0 = SYSTEM, ID > 0 = USER
+    @ColumnInfo(name = "user_id")
     val userId: Int,
 
     val name: String,

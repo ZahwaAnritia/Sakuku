@@ -10,12 +10,12 @@ data class TransactionEntity(
     @ColumnInfo(name = "trans_id")
     val id: Int = 0,
 
-    @ColumnInfo(name = "user_id") // FOREIGN KEY KE USER (INT)
+    @ColumnInfo(name = "user_id")
     val userId: Int,
 
     val amount: Double,
-    val category: String, // Tetap simpan nama kategori (Denormalisasi)
-    val type: String,     // "IN" atau "OUT"
+    val category: String,
+    val type: String,
     val note: String,
     val date: Long
 )

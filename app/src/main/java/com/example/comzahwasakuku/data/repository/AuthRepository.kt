@@ -10,7 +10,7 @@ import com.example.comzahwasakuku.data.local.entity.UserEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// Setup DataStore
+
 private val Context.dataStore by preferencesDataStore(name = "user_prefs")
 
 class AuthRepository(
@@ -26,7 +26,7 @@ class AuthRepository(
         val KEY_INDOMIE_PRICE = stringPreferencesKey("indomie_price")
     }
 
-    // --- MEMBACA DATA (GET) ---
+    // GET data
     val userId: Flow<Int> = context.dataStore.data.map { pref -> pref[KEY_USER_ID] ?: -1 } // Default -1
     val userSession: Flow<String?> = context.dataStore.data.map { pref -> pref[KEY_USER_NAME] }
     val userName: Flow<String> = context.dataStore.data.map { pref -> pref[KEY_USER_NAME] ?: "User" }
@@ -39,16 +39,16 @@ class AuthRepository(
         userDao.registerUser(user)
     }
 
-    // 2. LOGIN: Ambil User dari DB, Simpan ID-nya
+    // 2. LOGIN: ambil user dari db dan simpan idnya
     suspend fun login(email: String, sandi: String): Boolean {
         val userFromDb = userDao.loginLocal(email, sandi)
 
         if (userFromDb != null) {
-            val currentTime = System.currentTimeMillis() // Ambil waktu sekarang
-            userDao.updateLastLogin(email, currentTime) // Simpan ke Database
+            val currentTime = System.currentTimeMillis()
+            userDao.updateLastLogin(email, currentTime)
 
             context.dataStore.edit { pref ->
-                pref[KEY_USER_ID] = userFromDb.id // <--- SIMPAN ID INT
+                pref[KEY_USER_ID] = userFromDb.id
                 pref[KEY_USER_NAME] = userFromDb.nama
                 pref[KEY_USER_EMAIL] = userFromDb.email
                 pref[KEY_USER_LIMIT] = userFromDb.targetLimit.toLong().toString()
@@ -60,7 +60,7 @@ class AuthRepository(
         }
     }
 
-    // 3. UPDATE PROFIL
+    // 3.  PROFIL
     suspend fun saveProfileSettings(limit: String, price: String, email: String) {
         context.dataStore.edit { pref ->
             pref[KEY_USER_LIMIT] = limit

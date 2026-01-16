@@ -7,14 +7,14 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "users",
-    // BARIS INI YANG MEMBUAT EMAIL TIDAK BISA KEMBAR
+   //email gabisa sama
     indices = [Index(value = ["email"], unique = true)]
 )
 data class UserEntity(
-    // --- REVISI: TAMBAHKAN COLUMN INFO ---
+
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "user_id") // <--- Database baca ini sebagai 'user_id'
-    val id: Int = 0,              // <--- Kotlin tetap baca ini sebagai 'id'
+    @ColumnInfo(name = "user_id")
+    val id: Int = 0,
     // -------------------------------------
 
     @ColumnInfo(name = "email")

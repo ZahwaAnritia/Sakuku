@@ -10,7 +10,7 @@ import java.util.*
 
 class LaporanViewModel(private val repository: TransactionRepository) : ViewModel() {
 
-    // --- REVISI: Gunakan userId (Int), bukan Email ---
+
     fun getTransactions(userId: Int): Flow<List<TransactionEntity>> {
         return repository.getAllTransactions(userId)
     }
@@ -22,7 +22,7 @@ class LaporanViewModel(private val repository: TransactionRepository) : ViewMode
         }
     }
 
-    // Fungsi Filter (Logic tetap sama)
+    // Fungsi Filter
     fun filterTransactions(list: List<TransactionEntity>, filterType: String): List<TransactionEntity> {
         val calendar = Calendar.getInstance()
         val now = calendar.timeInMillis

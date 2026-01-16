@@ -17,34 +17,34 @@ class CategoryViewModel(
     private val repository: CategoryRepository
 ) : ViewModel() {
 
-    // 1. Simpan User ID (Bukan Email lagi)
+    // 1. Simpan User ID
     private val _userId = MutableStateFlow(-1)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    // 2. Logic Ambil Kategori (Pakai ID)
+    // 2.  Ambil Kategori
     @OptIn(ExperimentalCoroutinesApi::class)
     val categories: StateFlow<List<CategoryEntity>> = _userId.flatMapLatest { id ->
         if (id != -1) {
-            repository.getAllCategories(id) // Pastikan DAO menerima Int
+            repository.getAllCategories(id)
         } else {
             flowOf(emptyList())
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // 3. Set User ID dari UI
+    // 3. Set User ID d
     fun setUserId(id: Int) {
         _userId.value = id
     }
 
-    // 4. Add Category (Pakai ID)
+    // 4. Add Category
     fun addCategory(userId: Int, name: String, type: String, icon: String) {
         viewModelScope.launch {
             _isLoading.value = true
             try {
                 val newCategory = CategoryEntity(
-                    userId = userId, // SIMPAN ID
+                    userId = userId,
                     name = name,
                     type = type,
                     icon = icon

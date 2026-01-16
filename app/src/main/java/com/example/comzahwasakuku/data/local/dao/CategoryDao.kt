@@ -16,7 +16,7 @@ interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategory(category: CategoryEntity)
 
-    // --- TAMBAHKAN INI AGAR REPOSITORY TIDAK ERROR ---
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(categories: List<CategoryEntity>)
     // -------------------------------------------------
