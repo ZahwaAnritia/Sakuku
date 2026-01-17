@@ -24,9 +24,9 @@ Aplikasi ini dikembangkan untuk memenuhi tugas akhir mata kuliah **Pengembangan 
 
 
 ## Tampilan Aplikasi
-| Register | Login |
-| :---: | :---: |
-| <img width="250" height="1000" alt="Screenshot_20260116_223027" src="https://github.com/user-attachments/assets/a0ca6102-c8fd-425a-8ba8-825f5a9db27a" />|<img width="250" height="1000" alt="Screenshot_20260116_230037" src="https://github.com/user-attachments/assets/a3e86157-830d-4343-80ec-ec360b96e2b4" />|
+|Splash Screen| Register | Login |
+| :---: | :---: | :---: |
+|<img width="250" height="1000" alt="Screenshot_20260117_091926" src="https://github.com/user-attachments/assets/a7230fe5-8492-4a26-be98-f36a39cb69ed" />|<img width="250" height="1000" alt="Screenshot_20260116_223027" src="https://github.com/user-attachments/assets/a0ca6102-c8fd-425a-8ba8-825f5a9db27a" />|<img width="250" height="1000" alt="Screenshot_20260116_230037" src="https://github.com/user-attachments/assets/a3e86157-830d-4343-80ec-ec360b96e2b4" />|
 
 | Dashboard | Laporan | Profil|
 | :---: | :---: | :---: |
@@ -42,7 +42,7 @@ Aplikasi ini dikembangkan untuk memenuhi tugas akhir mata kuliah **Pengembangan 
 
 ## Validasi Input
 
-| validasi Register | Validasi Login |  Logout |
+| Validasi Register | Validasi Login |  Logout |
 | :---: | :---: | :---: |
 |<img width="250" height="1000" alt="Screenshot_20260116_222933" src="https://github.com/user-attachments/assets/f01d095f-6a8b-47e4-a788-9bc05f8bf438" />|<img width="250" height="1000" alt="Screenshot_20260116_230228" src="https://github.com/user-attachments/assets/97377622-fbe9-48c2-81ec-f7ce8aec1565" />|<img width="250" height="1000" alt="logout" src="https://github.com/user-attachments/assets/1e9755e4-2b59-4d22-8126-940066aa48b0" />|
 
