@@ -26,7 +26,9 @@ Aplikasi ini dikembangkan untuk memenuhi tugas akhir mata kuliah **Pengembangan 
 ## Tampilan Aplikasi
 |Splash Screen| Register | Login |
 | :---: | :---: | :---: |
-|<img width="250" height="1000" alt="Screenshot_20260117_091926" src="https://github.com/user-attachments/assets/a7230fe5-8492-4a26-be98-f36a39cb69ed" />|<img width="250" height="1000" alt="Screenshot_20260116_223027" src="https://github.com/user-attachments/assets/a0ca6102-c8fd-425a-8ba8-825f5a9db27a" />|<img width="250" height="1000" alt="Screenshot_20260116_230037" src="https://github.com/user-attachments/assets/a3e86157-830d-4343-80ec-ec360b96e2b4" />|
+|<img width="250" height="1000" alt="Screenshot_20260117_091926" src="https://github.com/user-attachments/assets/a7230fe5-8492-4a26-be98-f36a39cb69ed" />|<img width="250" height="1000" alt="Screenshot_20260117_101637" src="https://github.com/user-attachments/assets/e99af910-eb3f-4b0f-b29f-3daa88a637a3" />|<img width="250" height="1000" alt="Screenshot_20260117_101610" src="https://github.com/user-attachments/assets/d3a01959-235c-41b5-ab5f-ca16f8bab1b2" />|
+
+
 
 | Dashboard | Laporan | Profil|
 | :---: | :---: | :---: |
